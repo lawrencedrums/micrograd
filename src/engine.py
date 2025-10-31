@@ -50,6 +50,18 @@ class Value:
         )
         return out
 
+    def exp(self) -> Value:
+        def _backward():
+            self.grad += out.data * out.grad
+
+        out = Value(
+            data=math.exp(self.data),
+            _backward=_backward,
+            _children=(self,),
+            _op="exp",
+        )
+        return out
+
     def __repr__(self) -> str:
         return f"Value({self.data})"
 
@@ -85,3 +97,27 @@ class Value:
 
     def __rmul__(self, other: Value | int | float) -> Value:  # other * self
         return self * other
+
+    def __pow__(self, other: Value | int | float) -> Value:
+        other = other if isinstance(other, Value) else Value(other)
+    
+        def _backward():
+            self.grad += other.data * self.data ** (other.data - 1) * out.grad
+
+        out = Value(
+            data=self.data**other.data,
+            _backward=_backward,
+            _children=(self,),
+            _op=f"**{other}"
+        )
+        return out
+
+    def __truediv__(self, other: Value | int | float) -> Value:
+        return self * other**-1
+
+    def __neg__(self) -> Value:
+        return self * -1
+
+    def __sub__(self, other: Value | int | float) -> Value:
+        return self + (-other)
+
