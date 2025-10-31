@@ -23,7 +23,9 @@ def draw_graph(root: Value) -> Digraph:
     nodes, edges = build_graph(root)
     for n in nodes:
         uid = str(id(n))
-        dot.node(name=uid, label=f"{n.data}", shape="record")
+        dot.node(
+            name=uid, label="{ %s | data %.4f | grad %f }" % (n.label, n.data, n.grad), shape="record"
+        )
 
         if op := n._op:
             dot.node(name=uid+op, label=op)
