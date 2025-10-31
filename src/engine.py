@@ -19,12 +19,28 @@ class Value:
         self._op = _op
         self._children = set(_children)
 
+    def backward(self) -> None:
+        topo = []
+        visited = set()
+
+        def build_topo(node: Value) -> None:
+            if node not in visited:
+                visited.add(node)
+                for child in node._children:
+                    build_topo(child)
+                topo.append(node)
+
+        build_topo(self)
+        self.grad = 1.0
+        for node in reversed(topo):
+            node._backward()
+
     def tanh(self) -> Value:
         n = self.data
         data = (math.exp(2*n) - 1)/(math.exp(2*n) + 1)
 
         def _backward():
-            self.grad = (1 - out.data**2) * out.grad
+            self.grad += (1 - out.data**2) * out.grad
 
         out = Value(
             data=data,
@@ -41,8 +57,8 @@ class Value:
         other = other if isinstance(other, Value) else Value(other)
 
         def _backward():
-            self.grad = 1.0 * out.grad
-            other.grad = 1.0 * out.grad
+            self.grad += 1.0 * out.grad
+            other.grad += 1.0 * out.grad
 
         out = Value(
             data=(self.data + other.data),
@@ -56,8 +72,8 @@ class Value:
         other = other if isinstance(other, Value) else Value(other)
 
         def _backward():
-            self.grad = other.data * out.grad
-            other.grad = self.data * out.grad
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
 
         out = Value(
             data=(self.data * other.data),
