@@ -80,6 +80,9 @@ class Value:
         )
         return out
 
+    def __radd__(self, other: Value | int | float) -> Value:  # other + self
+        return self + other
+
     def __mul__(self, other: Value | int | float) -> Value:
         other = other if isinstance(other, Value) else Value(other)
 
