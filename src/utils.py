@@ -1,6 +1,6 @@
 from graphviz import Digraph
 
-from .engine import Value
+from micrograd.engine import Value
 
 
 def build_graph(root: Value) -> tuple[set[Value], set[tuple[Value, ...]]]:

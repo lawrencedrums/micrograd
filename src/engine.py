@@ -50,6 +50,20 @@ class Value:
         )
         return out
 
+    def relu(self) -> Value:
+        data = 0 if self.data < 0 else self.data
+
+        def _backward():
+            self.grad += (out.data > 0) * out.grad
+
+        out = Value(
+            data=data,
+            _backward=_backward,
+            _children=(self,),
+            _op="ReLU",
+        )
+        return out
+
     def exp(self) -> Value:
         def _backward():
             self.grad += out.data * out.grad
@@ -123,4 +137,3 @@ class Value:
 
     def __sub__(self, other: Value | int | float) -> Value:
         return self + (-other)
-
